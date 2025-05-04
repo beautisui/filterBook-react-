@@ -14,9 +14,9 @@ class SearchBar extends Component {
           onChange={onSearchChange}
         />
         <select value={filterField} onChange={onFilterChange}>
-          <option value="Title">Title</option>
-          <option value="Author">Author</option>
-          <option value="Year">Year</option>
+          <option value="title">Title</option>
+          <option value="author">Author</option>
+          <option value="year">Year</option>
         </select>
       </div>
     );
@@ -27,60 +27,63 @@ class Library extends Component {
   constructor(props) {
     super(props);
     this.books = [
-      { Title: "Great Expectations", Author: "Charles Dickens", Year: 1860 },
-      { Title: "War and Peace", Author: "Leo Tolstoy", Year: 1869 },
-      { Title: "The Great Gatsby", Author: "F. Scott Fitzgerald", Year: 1925 },
-      { Title: "To Kill a Mockingbird", Author: "Harper Lee", Year: 1960 },
-      { Title: "Pride and Prejudice", Author: "Jane Austen", Year: 1813 },
-      { Title: "1984", Author: "George Orwell", Year: 1949 },
-      { Title: "The Catcher in the Rye", Author: "J.D. Salinger", Year: 1951 },
+      { title: "Great Expectations", author: "Charles Dickens", year: 1860 },
+      { title: "War and Peace", author: "Leo Tolstoy", year: 1869 },
+      { title: "The Great Gatsby", author: "F. Scott Fitzgerald", year: 1925 },
+      { title: "To Kill a Mockingbird", author: "Harper Lee", year: 1960 },
+      { title: "Pride and Prejudice", author: "Jane Austen", year: 1813 },
+      { title: "1984", author: "George Orwell", year: 1949 },
+      { title: "The Catcher in the Rye", author: "J.D. Salinger", year: 1951 },
       {
-        Title: "One Hundred Years of Solitude",
-        Author: "Gabriel García Márquez",
-        Year: 1967,
+        title: "One Hundred Years of Solitude",
+        author: "Gabriel García Márquez",
+        year: 1967,
       },
-      { Title: "Brave New World", Author: "Aldous Huxley", Year: 1932 },
-      { Title: "The Lord of the Rings", Author: "J.R.R. Tolkien", Year: 1954 },
+      { title: "Brave New World", author: "Aldous Huxley", year: 1932 },
+      { title: "The Lord of the Rings", author: "J.R.R. Tolkien", year: 1954 },
       {
-        Title: "Crime and Punishment",
-        Author: "Fyodor Dostoevsky",
-        Year: 1866,
+        title: "Crime and Punishment",
+        author: "Fyodor Dostoevsky",
+        year: 1866,
       },
-      { Title: "The Hobbit", Author: "J.R.R. Tolkien", Year: 1937 },
-      { Title: "Moby-Dick", Author: "Herman Melville", Year: 1851 },
-      { Title: "Jane Eyre", Author: "Charlotte Brontë", Year: 1847 },
-      { Title: "Wuthering Heights", Author: "Emily Brontë", Year: 1847 },
-      { Title: "Don Quixote", Author: "Miguel de Cervantes", Year: 1605 },
-      { Title: "The Odyssey", Author: "Homer", Year: "800 BCE" },
-      { Title: "Anna Karenina", Author: "Leo Tolstoy", Year: 1877 },
+      { title: "The Hobbit", author: "J.R.R. Tolkien", year: 1937 },
+      { title: "Moby-Dick", author: "Herman Melville", year: 1851 },
+      { title: "Jane Eyre", author: "Charlotte Brontë", year: 1847 },
+      { title: "Wuthering Heights", author: "Emily Brontë", year: 1847 },
+      { title: "Don Quixote", author: "Miguel de Cervantes", year: 1605 },
+      { title: "The Odyssey", author: "Homer", year: "800 BCE" },
+      { title: "Anna Karenina", author: "Leo Tolstoy", year: 1877 },
       {
-        Title: "The Brothers Karamazov",
-        Author: "Fyodor Dostoevsky",
-        Year: 1880,
+        title: "The Brothers Karamazov",
+        author: "Fyodor Dostoevsky",
+        year: 1880,
       },
       {
-        Title: "The Picture of Dorian Gray",
-        Author: "Oscar Wilde",
-        Year: 1890,
+        title: "The Picture of Dorian Gray",
+        author: "Oscar Wilde",
+        year: 1890,
       },
-      { Title: "Frankenstein", Author: "Mary Shelley", Year: 1818 },
-      { Title: "Dracula", Author: "Bram Stoker", Year: 1897 },
+      { title: "Frankenstein", author: "Mary Shelley", year: 1818 },
+      { title: "Dracula", author: "Bram Stoker", year: 1897 },
       {
-        Title: "The Count of Monte Cristo",
-        Author: "Alexandre Dumas",
-        Year: 1844,
+        title: "The Count of Monte Cristo",
+        author: "Alexandre Dumas",
+        year: 1844,
       },
-      { Title: "Les Misérables", Author: "Victor Hugo", Year: 1862 },
+      { title: "Les Misérables", author: "Victor Hugo", year: 1862 },
     ];
 
     this.state = {
       books: this.books,
       searchText: "",
-      filterField: "Title",
+      filterField: "title",
+      sortField: "title",
+      sortOrder: "asc",
     };
 
     this.handleSearchChange = this.handleSearchChange.bind(this);
     this.handleFilterChange = this.handleFilterChange.bind(this);
+    this.handleSort = this.handleSort.bind(this);
   }
 
   handleSearchChange(event) {
@@ -91,16 +94,35 @@ class Library extends Component {
     this.setState({ filterField: event.target.value });
   }
 
-  getFilteredBooks() {
-    const { searchText, filterField } = this.state;
-    if (!searchText) return this.books;
+  handleSort(field) {
+    const { sortField, sortOrder } = this.state;
+    const newOrder =
+      field === sortField && sortOrder === "asc" ? "desc" : "asc";
+    this.setState({ sortField: field, sortOrder: newOrder });
+  }
 
-    return this.books.filter((book) =>
-      book[filterField]
-        .toString()
-        .toLowerCase()
-        .includes(searchText.toLowerCase())
-    );
+  getFilteredBooks() {
+    const { searchText, filterField, sortField, sortOrder } = this.state;
+    let filtered = this.books;
+
+    if (searchText) {
+      filtered = filtered.filter((book) =>
+        book[filterField]
+          .toString()
+          .toLowerCase()
+          .includes(searchText.toLowerCase())
+      );
+    }
+
+    return filtered.sort((bookA, bookB) => {
+      const valueA = bookA[sortField].toString().toLowerCase();
+      const valueB = bookB[sortField].toString().toLowerCase();
+
+      if (sortOrder === "asc") {
+        return valueA > valueB ? 1 : valueA < valueB ? -1 : 0;
+      }
+      return valueA < valueB ? 1 : valueA > valueB ? -1 : 0;
+    });
   }
 
   render() {
@@ -124,19 +146,22 @@ class Library extends Component {
           </caption>
           <thead>
             <tr>
-              <th>Title</th>
-              <th>Author</th>
-              <th>Year</th>
+              <th onClick={() => this.handleSort("title")}>Title</th>
+              <th onClick={() => this.handleSort("author")}>Author</th>
+              <th onClick={() => this.handleSort("year")}>Year</th>
             </tr>
           </thead>
           <tbody>
-            {filteredBooks.map((book, index) => (
-              <tr key={index}>
-                <td>{book.Title}</td>
-                <td>{book.Author}</td>
-                <td>{book.Year}</td>
-              </tr>
-            ))}
+            {filteredBooks.map((book, index) => {
+              const { title, author, year } = book;
+              return (
+                <tr key={index}>
+                  <td>{title}</td>
+                  <td>{author}</td>
+                  <td>{year}</td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>
